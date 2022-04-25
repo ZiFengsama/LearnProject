@@ -7,9 +7,12 @@ import TypeNav from '@/components/TypeNav'
 import store from '@/store';
 Vue.component(TypeNav.name,TypeNav)
 
-import {reqCategoryList} from '@/api';
-reqCategoryList();
+// import {reqCategoryList} from '@/api';
+// reqCategoryList();
 
+import '@/mock/mockServe';
+// 引入swiper样式
+import "swiper/css/swiper.css"
 Vue.config.productionTip = false
 new Vue({
   render: h => h(App),

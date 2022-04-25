@@ -1,10 +1,11 @@
 <template>
     <div class="type-nav">
         <div class="container">
-            <div @mouseleave="leaveIndex">
+            <div @mouseleave="leaveShow" @mouseenter="enterShow">
                 <h2 class="all">全部商品分类</h2>
                 <!-- 三级联动 -->
-                <div class="sort">
+                <transition name="sort">
+                <div class="sort" v-show="show">
                 <div class="all-sort-list2" @click="goSearch">
                 <div class="item" v-for="(c1,index) in categoryList" :key="c1.categoryId">
                     <h3 @mouseenter="changeIndex(index)" :class="{now:NowIndex==index}">
@@ -30,6 +31,7 @@
             </div>
             </div>
                 </div>
+                </transition>
             </div>
         
         <nav class="nav">
@@ -55,12 +57,15 @@ export default {
     name: "TypeNav",
     data(){
         return{
-            NowIndex:-1
+            NowIndex:-1,
+            show:true
         }
     },
     mounted(){
-        // 通知vuex发送请求，获取数据，存储于仓库当中
-        this.$store.dispatch('categoryList');
+        // 判断是否在home路由下，若不是则隐藏
+        if(this.$route.path!=='/home'){
+            this.show = false
+        }
     },
     computed:{
         ...mapState({
@@ -80,8 +85,16 @@ export default {
             // console.log('aaa');
             this.NowIndex = index
         },50),
-        leaveIndex(){
+        leaveShow(){
+            if(this.$route.path!=='/home'){
+                this.show = false
+            }
             this.NowIndex = -1
+        },
+        enterShow(){
+            if(this.$route.path!=='/home'){
+                this.show = true
+            }
         },
         goSearch(event){
             let element = event.target
@@ -97,9 +110,15 @@ export default {
                 }else{
                     query.category3Id=category3id
                 }
-                // 整理完参数
-                location.query = query;
-                this.$router.push(location)
+                if(this.$route.params){
+                    // 整理完参数
+                    location.params = this.$route.params
+                    location.query = query;
+                    this.$router.push(location)
+                }else{
+                    location.query = query;
+                    this.$router.push(location)
+                }
             }
         },
     }
@@ -226,6 +245,16 @@ export default {
             }
             }
         }
+        }
+
+        .sort-enter,.sort-leave-to{
+            height: 0px;
+        }
+        .sort-enter-to,.sort-leave{
+            height: 461px;
+        }
+        .sort-enter-active,.sort-leave-active{
+            transition: all .2s linear;
         }
     }
     }

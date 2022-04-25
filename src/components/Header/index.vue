@@ -52,7 +52,13 @@ export default {
             // 第二种：模板字符串形式
             // this.$router.push(`/search/${this.keywords}?k=${this.keywords.toUpperCase()}`)
             // 第三种：对象写法
-            this.$router.push({name:"search",params:{keywords:this.keywords},query:{k:this.keywords.toUpperCase()}})
+            if(this.$route.query){
+                let location ={name:"search",params:{keywords:this.keywords}}
+                location.query = this.$route.query
+                this.$router.push(location);
+            }
+            
+            // ,query:{k:this.keywords.toUpperCase()}
 
             
             // 面试题1：如何路由传递参数(对象写法)path是否可以结合params参数一起使用？ 答：不可以 params只能结合name使用
