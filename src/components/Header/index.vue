@@ -56,6 +56,8 @@ export default {
                 let location ={name:"search",params:{keywords:this.keywords}}
                 location.query = this.$route.query
                 this.$router.push(location);
+                // console.log(this.$route);
+                // console.log(location);
             }
             
             // ,query:{k:this.keywords.toUpperCase()}
@@ -70,12 +72,18 @@ export default {
             // 面试题4：路由组件能否传递props数据？
             // 可以：三种写法
             
-        }
+        },
+
     },
     data(){
         return{
             keywords:''
         }
+    },
+    mounted(){
+        this.$bus.$on("clear",()=>{
+            this.keywords="";
+        })
     }
 }
 </script>
