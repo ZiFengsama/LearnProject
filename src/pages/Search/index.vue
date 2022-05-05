@@ -41,13 +41,16 @@
               </ul>
             </div>
           </div>
+          <!-- 销售产品列表 -->
           <div class="goods-list">
             <ul class="yui3-g">
               <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank">
-                      <img :src="goods.defaultImg" /></a>
+                    <!-- 在路由跳转时一定要带上id（params参数） -->
+                    <router-link :to="`/detail/${goods.id}`">
+                      <img :src="goods.defaultImg" />
+                    </router-link>
                   </div>
                   <div class="price">
                     <strong>
@@ -70,7 +73,7 @@
             </ul>
           </div>
           <!-- 分液器 -->
-          <PaginationModule/>
+          <PaginationModule :pageNo="searchParams.pageNo" :pageSize="searchParams.pageSize" :total="total" :continues="5" @getPageNo="getPageNo"/>
         </div>
       </div>
     </div>
@@ -78,7 +81,7 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters,mapState } from 'vuex'
   import SearchSelector from './SearchSelector/SearchSelector'
   export default {
     name: 'SearchPage',
@@ -108,7 +111,7 @@
           // 平台售卖属性操作带的参数
           props: [],
           // 品牌
-          trademark: ""
+          trademark: "",
         }
       }
     },
@@ -134,7 +137,11 @@
       },
       isDesc(){
         return this.searchParams.order.indexOf('desc')!=-1
-      }
+      },
+      // 获取state中的数据
+      ...mapState({
+        total:state=>state.search.searchList.total
+      })
     },
     methods:{
       // 向服务器请求数据
@@ -219,6 +226,13 @@
         // 再次发请求
         this.getData();
       },
+      // 获取当前页码的回调函数
+      getPageNo(pageNo){
+        // 整理数据发起请求
+        this.searchParams.pageNo = pageNo;
+        this.getData();
+        console.log(pageNo);
+      }
     },
     watch:{
       // 监听路由信息是否发生变化，如果发生变化，再次发起请求

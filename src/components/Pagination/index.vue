@@ -1,27 +1,58 @@
 <template>
     <div class="pagination">
         
-        <button>上一页</button>
-        <button>1</button>
-        <button>···</button>
+        <button :disabled="pageNo==1" @click="$emit('getPageNo',pageNo-1)" :class="{active:pageNo==1}">上一页</button>
+        <button v-if="startNumAndEndNum.start>1" @click="$emit('getPageNo',1)">1</button>
+        <button v-if="startNumAndEndNum.start>2">···</button>
 
-        <button>3</button>
-        <button>4</button>
-        <button>5</button>
-        <button>6</button>
-        <button>7</button>
+        <!-- 中间部分 -->
+        <span v-for="(page,index) in startNumAndEndNum.end" :key="index">
+            <button v-if="page>=startNumAndEndNum.start" @click="$emit('getPageNo',page)" :class="{active:pageNo==page}">{{page}}</button>
+        </span>
         
-        <button>···</button>
-        <button>9</button>
-        <button>下一页</button>
+        <button v-if="startNumAndEndNum.end<totalPage - 1">···</button>
+        <button v-if="startNumAndEndNum.end<totalPage" @click="$emit('getPageNo',totalPage)">{{totalPage}}</button>
+        <button :disabled="pageNo==totalPage" @click="$emit('getPageNo',pageNo+1)">下一页</button>
         
-        <button style="margin-left: 30px">共 60 条</button>
+        <button style="margin-left: 30px" :class="{active:pageNo==totalPage}">共{{totalPage}}条</button>
     </div>
 </template>
 
 <script>
 export default {
-    name:"PaginationModule"
+    name:"PaginationModule",
+    props:['pageNo','pageSize','total','continues'],
+    computed:{
+        //总共多少页
+        totalPage(){
+            // 向上取整
+            return Math.ceil(this.total/this.pageSize);
+        },
+        // 计算连续的页码的其实数字与结束数字【连续页码的数字至少是5】
+    startNumAndEndNum(){
+        const {pageNo,continues,totalPage} = this;
+        let start = 0, end =0;
+        // 判断连续页码是否有5页
+        // 不正常现象：总页码没有连续页码多
+        if(continues > totalPage){
+            start = 1;
+            end = totalPage;
+        }else {
+            // 正常现象：连续页码5，但总页码一定大于5
+            start = pageNo -parseInt(continues/2);
+            end =pageNo +parseInt(continues/2);
+            if(start < 1){
+                start = 1;
+                end = continues;
+            }
+            if(end > totalPage){
+                end = totalPage;
+                start = totalPage -continues +1;
+            }
+        }
+        return {start,end};
+    }
+    },
 }
 </script>
 
@@ -57,5 +88,8 @@ export default {
             color: #fff;
         }
         }
+    }
+    .active {
+        background: skyblue;
     }
 </style>

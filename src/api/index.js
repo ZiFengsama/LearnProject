@@ -40,4 +40,30 @@ const reqGetSearchInfo = (params)=>{
         data:params
     })
 }
-export {reqCategoryList,reqGetBannerList,reqFloorList,reqGetSearchInfo}
+
+// 获取产品详情信息的接口 URL: /api/item/{ skuId } 请求方式GET
+
+const reqGoodsInfo = (skuId)=>{
+    return requests({
+        url:`/item/${skuId}`,
+        method:'GET',
+    });
+}
+
+// 将产品添加到购物车当中（获取更新某一个产品的个数）
+const reqAddOrUpdateShopCart = (skuId,skuNum)=>{
+    return requests({
+        url:`/cart/addToCart/${skuId}/${skuNum}`,
+        method:'POST'
+    })
+}
+
+// 获取购物车数据的接口
+// url:/api/cart/cartList 请求方式 GET
+const reqCartList = ()=>{
+    return requests({
+        url:'/cart/cartList',
+        method:'GET'
+    })
+}
+export {reqCategoryList,reqGetBannerList,reqFloorList,reqGetSearchInfo,reqGoodsInfo,reqAddOrUpdateShopCart,reqCartList}

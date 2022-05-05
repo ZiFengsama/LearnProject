@@ -10,14 +10,27 @@ import "nprogress/nprogress.css"
 
 // 在项目中的api文件夹 用来写axios
 import axios from 'axios';
+// 在当前模块中引入store仓库
+import store from '@/store';
+
 const requests = axios.create({
     baseURL:"/api",
     // baseURL:"/demo",
     timeout:5000,
 });
 // 请求拦截器：在发请求之前，请求拦截器可以检查到，并且可以在请求发出去之前做一些事情
+// requests.interceptors.request.use((config)=>{
+//     // config：配置对象，对象里面有一个属性很重要，headers请求头
+//     nprogress.start();
+//     return config;
+// })
 requests.interceptors.request.use((config)=>{
     // config：配置对象，对象里面有一个属性很重要，headers请求头
+    let token = store.state.detail.uuid_token;
+    if(store.state.detail.uuid_token){
+        // 请求头添加一个字段(userTempId)，和后台商量好了
+        config.headers.userTempId = token;
+    }
     nprogress.start();
     return config;
 })
