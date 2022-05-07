@@ -14,7 +14,7 @@
         <!-- 产品列表 -->
         <ul class="cart-list" v-for="(cart,index) in cartInfoList" :key="cart.id">
           <li class="cart-list-con1">
-            <input type="checkbox" name="chk_list" :checked="cart.isChecked==1">
+            <input type="checkbox" name="chk_list" :checked="cart.isChecked==1" @change="updateChecked(cart,$event)">
           </li>
           <li class="cart-list-con2">
             <img :src="cart.imgUrl">
@@ -32,7 +32,7 @@
             <span class="sum">{{cart.skuNum*cart.skuPrice}}</span>
           </li>
           <li class="cart-list-con7">
-            <a href="#none" class="sindelet">删除</a>
+            <a href="#none" class="sindelet" @click="deleteCartById(cart)">删除</a>
             <br>
             <a href="#none">移到收藏</a>
           </li>
@@ -41,11 +41,11 @@
     </div>
     <div class="cart-tool">
       <div class="select-all">
-        <input class="chooseAll" type="checkbox" :checked="isAllChecked">
+        <input class="chooseAll" type="checkbox" :checked="isAllChecked" @change="updateAllCartChecked">
         <span>全选</span>
       </div>
       <div class="option">
-        <a href="#none">删除选中的商品</a>
+        <a href="#none" @click="deleteAllCheckedCart">删除选中的商品</a>
         <a href="#none">移到我的关注</a>
         <a href="#none">清除下柜商品</a>
       </div>
@@ -66,6 +66,7 @@
 
 <script>
   import {mapGetters} from 'vuex';
+  import throttle from 'lodash/throttle'
   export default {
     name: 'ShopCart',
     mounted(){
@@ -76,8 +77,8 @@
       getData(){
         this.$store.dispatch('getCartList');
       },
-      async handler(type,disNum,cart){
-        // type 区分点击了+、-、input框
+      handler:throttle(async function(type,disNum,cart){
+            // type 区分点击了+、-、input框
         // disNum形参：+变化量(1)，-变化量(1)，input最终个数（不是变化量）
         // cart:哪一个产品【身上有id】
         switch(type){
@@ -115,13 +116,53 @@
           // 修改失败
           alert(error.message);
         }
+        },500),
+      // 删除一个产品的操作
+      deleteCartById(cart){
+        try {
+          // 如果删除成功，再次发请求获取数据
+          this.$store.dispatch('deleteCartListById',cart.skuId);
+          this.getData();
+        } catch (error) {
+          alert(error.message);
+        }
+      },
+      // 修改某一个产品的选中状态
+      async updateChecked(cart,event){
+        try {
+          let checked = event.target.checked ? "1":"0";
+          await this.$store.dispatch('updateCheckedById',{skuId:cart.skuId,isChecked:checked});
+          this.getData();
+        } catch (error) {
+          alert(error.message);
+        }
+      },
+      // 删除全部选中的商品
+      async deleteAllCheckedCart(){
+        try {
+          await this.$store.dispatch('deleteAllcheckedCart');
+          // 成功则在发请求获取购物车列表
+          this.getData();
+        } catch (error) {
+          alert(error.message);
+        }
+      },
+      // 修改全部产品的选中状态
+      async updateAllCartChecked(event){
+        try {
+          let isChecked = event.target.checked?"1":"0";
+          await this.$store.dispatch("updateAllCartIsChecked",isChecked);
+          this.getData();
+        } catch (error) {
+          console.log(error);
+        }
       }
     },
     computed:{
       ...mapGetters(['cartList']),
         // 购物车数据
       cartInfoList(){
-          return this.cartList.cartInfoList||[];
+          return this.cartList.cartInfoList || [];
       },
       // 计算购买产品的总价
       totalPrice(){
